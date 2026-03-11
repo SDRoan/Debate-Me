@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Debate Me</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@400;700;900&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg-1: #ff7b00;
+      --bg-2: #ff006e;
+      --bg-3: #3a86ff;
+      --bg-4: #06d6a0;
+      --ink: #121212;
+      --card: #fff9d9;
+      --accent: #ffbe0b;
+      --danger: #ef476f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Nunito", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.25) 0 10%, transparent 11%),
+        radial-gradient(circle at 80% 35%, rgba(255, 255, 255, 0.2) 0 9%, transparent 10%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2) 33%, var(--bg-3) 66%, var(--bg-4));
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(840px, 100%);
+      background: rgba(255, 255, 255, 0.9);
+      border: 4px solid var(--ink);
+      border-radius: 24px;
+      box-shadow: 12px 12px 0 var(--ink);
+      overflow: hidden;
+      animation: pop-in 450ms ease-out;
+    }
+
+    .header {
+      background: var(--accent);
+      border-bottom: 4px solid var(--ink);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-family: "Bungee", sans-serif;
+      font-size: clamp(1.5rem, 4vw, 2.3rem);
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+
+    .badge {
+      background: white;
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-weight: 900;
+      font-size: 0.85rem;
+      transform: rotate(-4deg);
+      white-space: nowrap;
+    }
+
+    .content {
+      padding: clamp(16px, 2.5vw, 28px);
+      display: grid;
+      gap: 18px;
+    }
+
+    .prompt-wrap {
+      display: grid;
+      gap: 10px;
+    }
+
+    label {
+      font-weight: 900;
+      font-size: 1rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      resize: vertical;
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font: inherit;
+      font-size: 1.05rem;
+      background: #ffffff;
+      outline: none;
+      transition: transform 140ms ease, box-shadow 140ms ease;
+    }
+
+    textarea:focus {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 var(--ink);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    button {
+      border: 3px solid var(--ink);
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-family: "Nunito", sans-serif;
+      font-weight: 900;
+      font-size: 1rem;
+      cursor: pointer;
+      background: #fff;
+      transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 var(--ink);
+    }
+
+    button:active:not(:disabled) {
+      transform: translate(0, 0);
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    #debateBtn {
+      background: #2ec4b6;
+    }
+
+    #resetBtn {
+      background: #ffd166;
+    }
+
+    #endDebateBtn {
+      background: #ffadad;
+    }
+
+    #fetchTrendingBtn {
+      background: #bde0fe;
+    }
+
+    .status {
+      min-height: 24px;
+      font-weight: 800;
+      color: #4d4d4d;
+    }
+
+    .status.error {
+      color: #b00020;
+    }
+
+    #rebuttalBtn {
+      background: #ff8fab;
+    }
+
+    .trending-box {
+      border: 3px solid var(--ink);
+      border-radius: 14px;
+      background: #fff4d6;
+      box-shadow: 5px 5px 0 var(--ink);
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .trending-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .trending-title {
+      margin: 0;
+      font-family: "Bungee", sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.4px;
+      line-height: 1;
+    }
+
+    .trending-status {
+      margin: 0;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #4b4b4b;
+    }
+
+    .topic-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .topic-chip {
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: #ffffff;
+      font-weight: 900;
+      font-size: 0.86rem;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .topic-chip:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0 var(--ink);
+    }
+
+    .topic-chip:active {
+      transform: translate(0, 0);
+      box-shadow: 1px 1px 0 var(--ink);
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .score-item {
+      background: #ffffff;
+      border: 3px solid var(--ink);
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 4px 4px 0 var(--ink);
+      display: grid;
+      gap: 4px;
+      text-align: center;
+    }
+
+    .score-item .label {
+      font-size: 0.8rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .score-item .value {
+      font-family: "Bungee", sans-serif;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .score-item.user {
+      background: #dff9ff;
+    }
+
+    .score-item.opponent {
+      background: #fff5d8;
+    }
+
+    .score-item.rounds {
+      background: #f2e8ff;
+    }
+
+    .verdict-card {
+      border: 4px solid var(--ink);
+      border-radius: 16px;
+      background: #fff7f0;
+      box-shadow: 8px 8px 0 var(--ink);
+      padding: 14px;
+      display: grid;
+      gap: 6px;
+      animation: slide-up 260ms ease-out;
+    }
+
+    .verdict-card[hidden] {
+      display: none;
+    }
+
+    .verdict-title {
+      margin: 0;
+      font-family: "Bungee", sans-serif;
+      font-size: 1rem;
+      line-height: 1;
+      letter-spacing: 0.4px;
+    }
+
+    .verdict-line {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 900;
+    }
+
+    .verdict-detail {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.35;
+      color: #383838;
+      font-weight: 800;
+    }
+
+    .debate-arena {
+      display: none;
+      gap: 12px;
+    }
+
+    .debate-arena.visible {
+      display: grid;
+    }
+
+    .arena-title {
+      margin: 0;
+      font-family: "Bungee", sans-serif;
+      font-size: 1rem;
+      line-height: 1;
+      letter-spacing: 0.4px;
+    }
+
+    .debate-thread {
+      display: grid;
+      gap: 12px;
+    }
+
+    .turn-card {
+      border: 4px solid var(--ink);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 6px 6px 0 var(--ink);
+      animation: slide-up 260ms ease-out;
+    }
+
+    .turn-card.user {
+      background: #dff9ff;
+    }
+
+    .turn-card.opponent {
+      background: var(--card);
+    }
+
+    .turn-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .turn-role {
+      margin: 0;
+      font-family: "Bungee", sans-serif;
+      font-size: 0.86rem;
+      line-height: 1;
+    }
+
+    .turn-number {
+      font-size: 0.8rem;
+      font-weight: 900;
+      opacity: 0.8;
+    }
+
+    .turn-text {
+      margin: 0;
+      background: #ffffff;
+      border: 3px dashed var(--ink);
+      border-radius: 12px;
+      padding: 12px;
+      line-height: 1.45;
+      font-size: 1rem;
+      white-space: pre-wrap;
+    }
+
+
+    .rebuttal-wrap {
+      display: grid;
+      gap: 10px;
+    }
+
+    .rebuttal-wrap[hidden] {
+      display: none;
+    }
+
+    #rebuttalInput {
+      min-height: 95px;
+    }
+
+
+    .note {
+      margin: 0;
+      font-size: 0.86rem;
+      color: #4d4d4d;
+      font-weight: 700;
+    }
+
+    @keyframes pop-in {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes slide-up {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .scoreboard {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>Debate Me</h1>
+      <span class="badge">Bring your hot take</span>
+    </header>
+
+    <section class="content">
+      <div class="prompt-wrap">
+        <label for="opinionInput">Your opinion:</label>
+        <textarea
+          id="opinionInput"
+          placeholder='Example: "Pineapple belongs on pizza."'
+        ></textarea>
+      </div>
+
+      <section class="trending-box">
+        <div class="trending-head">
+          <h2 class="trending-title">Need Ideas? Trending Topics</h2>
+          <button id="fetchTrendingBtn" type="button">Refresh Topics</button>
+        </div>
+        <p id="trendingStatus" class="trending-status">Loading trending topics...</p>
+        <div id="topicChips" class="topic-chips"></div>
+      </section>
+
+      <div class="actions">
+        <button id="debateBtn" type="button">Debate Me</button>
+        <button id="endDebateBtn" type="button">End Debate</button>
+        <button id="resetBtn" type="button">Try Another</button>
+      </div>
+
+      <p id="statusText" class="status"></p>
+
+      <section class="scoreboard" aria-live="polite">
+        <article class="score-item user">
+          <span class="label">You</span>
+          <span id="userScoreText" class="value">0.0</span>
+        </article>
+        <article class="score-item opponent">
+          <span class="label">Counter Cannon</span>
+          <span id="opponentScoreText" class="value">0.0</span>
+        </article>
+        <article class="score-item rounds">
+          <span class="label">Rounds Judged</span>
+          <span id="roundsText" class="value">0</span>
+        </article>
+      </section>
+
+      <section id="verdictCard" class="verdict-card" hidden>
+        <h2 class="verdict-title">Final Verdict</h2>
+        <p id="winnerLine" class="verdict-line"></p>
+        <p id="loserLine" class="verdict-line"></p>
+        <p id="verdictDetail" class="verdict-detail"></p>
+      </section>
+
+      <section id="debateArena" class="debate-arena" aria-live="polite">
+        <h2 class="arena-title">Debate Ring</h2>
+        <div id="debateThread" class="debate-thread"></div>
+      </section>
+
+      <div id="rebuttalWrap" class="prompt-wrap rebuttal-wrap" hidden>
+        <label for="rebuttalInput">Your rebuttal:</label>
+        <textarea
+          id="rebuttalInput"
+          placeholder='Push back on the opponent, then click "Send Rebuttal".'
+        ></textarea>
+        <div class="actions">
+          <button id="rebuttalBtn" type="button">Send Rebuttal</button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    const OLLAMA_ENDPOINT = "http://127.0.0.1:11434/api/generate";
+    const MODEL_NAME = "llama3.2";
+    const MAX_USER_TURNS = 8;
+    const WIKI_TRENDING_ENDPOINT = "https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia/all-access";
+
+    const opinionInput = document.getElementById("opinionInput");
+    const rebuttalInput = document.getElementById("rebuttalInput");
+    const debateBtn = document.getElementById("debateBtn");
+    const fetchTrendingBtn = document.getElementById("fetchTrendingBtn");
+    const endDebateBtn = document.getElementById("endDebateBtn");
+    const rebuttalBtn = document.getElementById("rebuttalBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const statusText = document.getElementById("statusText");
+    const trendingStatus = document.getElementById("trendingStatus");
+    const topicChips = document.getElementById("topicChips");
+    const userScoreText = document.getElementById("userScoreText");
+    const opponentScoreText = document.getElementById("opponentScoreText");
+    const roundsText = document.getElementById("roundsText");
+    const verdictCard = document.getElementById("verdictCard");
+    const winnerLine = document.getElementById("winnerLine");
+    const loserLine = document.getElementById("loserLine");
+    const verdictDetail = document.getElementById("verdictDetail");
+    const debateArena = document.getElementById("debateArena");
+    const debateThread = document.getElementById("debateThread");
+    const rebuttalWrap = document.getElementById("rebuttalWrap");
+
+    let debateHistory = [];
+    let scoreBoard = { user: 0, opponent: 0, rounds: 0 };
+    let roundWins = { user: 0, opponent: 0, ties: 0 };
+    const COMMON_WORDS = new Set([
+      "the", "and", "that", "with", "from", "your", "this", "have", "just", "about", "there",
+      "would", "could", "should", "their", "they", "them", "then", "because", "while", "into",
+      "also", "more", "than", "very", "really", "like", "what", "when", "where", "which", "will"
+    ]);
+
+    function setLoadingState(isLoading) {
+      debateBtn.disabled = isLoading;
+      fetchTrendingBtn.disabled = isLoading;
+      endDebateBtn.disabled = isLoading;
+      rebuttalBtn.disabled = isLoading;
+      opinionInput.disabled = isLoading;
+      rebuttalInput.disabled = isLoading;
+      resetBtn.disabled = isLoading;
+    }
+
+    function showStatus(message, isError = false) {
+      statusText.textContent = message;
+      statusText.classList.toggle("error", isError);
+    }
+
+    function toFriendlyApiError(status, apiMessage) {
+      const raw = apiMessage || "";
+
+      if (status === 404 && /model/i.test(raw)) {
+        return `Ollama model "${MODEL_NAME}" is missing. Run: ollama pull ${MODEL_NAME}`;
+      }
+
+      if (status === 404) {
+        return "Ollama endpoint not found. Confirm Ollama is running on http://127.0.0.1:11434.";
+      }
+
+      if (status >= 500) {
+        return "Ollama returned a server error. Restart Ollama and try again.";
+      }
+
+      return `API request failed (${status}). ${raw || "Unknown Ollama error."}`.trim();
+    }
+
+    function updateScoreboardUI() {
+      userScoreText.textContent = scoreBoard.user.toFixed(1);
+      opponentScoreText.textContent = scoreBoard.opponent.toFixed(1);
+      roundsText.textContent = String(scoreBoard.rounds);
+    }
+
+    function resetJudgingState() {
+      scoreBoard = { user: 0, opponent: 0, rounds: 0 };
+      roundWins = { user: 0, opponent: 0, ties: 0 };
+      verdictCard.hidden = true;
+      winnerLine.textContent = "";
+      loserLine.textContent = "";
+      verdictDetail.textContent = "";
+      updateScoreboardUI();
+    }
+
+    function tokenizeText(text) {
+      return (text || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter(Boolean);
+    }
+
+    function countMatches(text, phrases) {
+      const lower = (text || "").toLowerCase();
+      return phrases.reduce((count, phrase) => count + (lower.includes(phrase) ? 1 : 0), 0);
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function getContentWords(words) {
+      return words.filter((word) => word.length > 3 && !COMMON_WORDS.has(word));
+    }
+
+    function computeOverlapScore(currentText, targetText) {
+      const currentSet = new Set(getContentWords(tokenizeText(currentText)));
+      const targetSet = new Set(getContentWords(tokenizeText(targetText)));
+      if (targetSet.size === 0 || currentSet.size === 0) {
+        return 0;
+      }
+
+      let overlapCount = 0;
+      targetSet.forEach((word) => {
+        if (currentSet.has(word)) {
+          overlapCount += 1;
+        }
+      });
+
+      return clamp(overlapCount / Math.min(targetSet.size, 8), 0, 1);
+    }
+
+    function scoreTurn(currentText, targetText) {
+      const words = tokenizeText(currentText);
+      const wordCount = words.length;
+      const sentenceCount = currentText.split(/[.!?]+/).filter((part) => part.trim().length > 0).length || 1;
+      const logicHits = countMatches(currentText, [
+        "because", "therefore", "however", "but", "since", "if", "then", "which means", "so that"
+      ]);
+      const exampleHits = countMatches(currentText, [
+        "for example", "for instance", "imagine", "consider", "let's say"
+      ]);
+      const overlap = computeOverlapScore(currentText, targetText);
+
+      let score = 4.2;
+
+      if (wordCount >= 14 && wordCount <= 95) {
+        score += 1.8;
+      } else if (wordCount < 8) {
+        score -= 1.8;
+      } else if (wordCount > 140) {
+        score -= 1.2;
+      }
+
+      if (sentenceCount >= 2 && sentenceCount <= 5) {
+        score += 1.2;
+      } else if (sentenceCount === 1) {
+        score -= 0.6;
+      } else if (sentenceCount > 7) {
+        score -= 0.5;
+      }
+
+      score += Math.min(logicHits, 3) * 0.45;
+      score += Math.min(exampleHits, 2) * 0.35;
+      score += overlap * 2.0;
+
+      if (/^[A-Z\s!?.,'-]+$/.test(currentText) && currentText.length > 15) {
+        score -= 0.8;
+      }
+
+      return clamp(score, 0, 10);
+    }
+
+    function judgeLatestRound() {
+      if (debateHistory.length < 2) {
+        return;
+      }
+
+      const latest = debateHistory[debateHistory.length - 1];
+      const previous = debateHistory[debateHistory.length - 2];
+
+      if (previous.role !== "user" || latest.role !== "opponent") {
+        return;
+      }
+
+      const userRoundScore = scoreTurn(previous.text, latest.text);
+      const opponentRoundScore = scoreTurn(latest.text, previous.text);
+      const delta = userRoundScore - opponentRoundScore;
+
+      scoreBoard.user += userRoundScore;
+      scoreBoard.opponent += opponentRoundScore;
+      scoreBoard.rounds += 1;
+
+      if (Math.abs(delta) < 0.35) {
+        roundWins.ties += 1;
+      } else if (delta > 0) {
+        roundWins.user += 1;
+      } else {
+        roundWins.opponent += 1;
+      }
+
+      updateScoreboardUI();
+    }
+
+    function declareWinner() {
+      if (scoreBoard.rounds === 0) {
+        showStatus("No rounds to judge yet. Start debating first.", true);
+        return;
+      }
+
+      const userTotal = scoreBoard.user;
+      const opponentTotal = scoreBoard.opponent;
+      const diff = Math.abs(userTotal - opponentTotal);
+
+      verdictCard.hidden = false;
+
+      if (diff < 0.5) {
+        winnerLine.textContent = "Result: Tie";
+        loserLine.textContent = "No loser this round.";
+      } else if (userTotal > opponentTotal) {
+        winnerLine.textContent = "Winner: You";
+        loserLine.textContent = "Loser: The Counter Cannon";
+      } else {
+        winnerLine.textContent = "Winner: The Counter Cannon";
+        loserLine.textContent = "Loser: You";
+      }
+
+      verdictDetail.textContent =
+        `Final score: You ${userTotal.toFixed(1)} vs Counter Cannon ${opponentTotal.toFixed(1)} ` +
+        `over ${scoreBoard.rounds} judged rounds. Round wins - You ${roundWins.user}, ` +
+        `Counter Cannon ${roundWins.opponent}, Ties ${roundWins.ties}.`;
+    }
+
+    function pad2(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function formatTrendingTitle(rawTitle) {
+      let title = rawTitle || "";
+      try {
+        title = decodeURIComponent(title);
+      } catch (_) {
+        title = rawTitle || "";
+      }
+      return title.replace(/_/g, " ").trim();
+    }
+
+    function isValidTrendingTitle(title) {
+      if (!title) {
+        return false;
+      }
+      if (title === "Main_Page" || title === "Special:Search") {
+        return false;
+      }
+      if (title.includes(":")) {
+        return false;
+      }
+      if (title.length < 3 || title.length > 70) {
+        return false;
+      }
+      return true;
+    }
+
+    function getLocalDateDaysAgo(daysAgo) {
+      const date = new Date();
+      date.setDate(date.getDate() - daysAgo);
+      return {
+        year: date.getFullYear(),
+        month: pad2(date.getMonth() + 1),
+        day: pad2(date.getDate())
+      };
+    }
+
+    function buildStarterOpinion(topic) {
+      const starters = [
+        `Hot take: ${topic} is overrated.`,
+        `Unpopular opinion: ${topic} deserves way more hype.`,
+        `${topic} gets too much attention for what it is.`,
+        `${topic} is actually a big deal and people sleep on it.`
+      ];
+      return starters[Math.floor(Math.random() * starters.length)];
+    }
+
+    function useTrendingTopic(topic) {
+      opinionInput.value = buildStarterOpinion(topic);
+      opinionInput.focus();
+      showStatus(`Loaded topic: ${topic}. Edit it or click Debate Me.`);
+    }
+
+    function renderTrendingTopics(topics) {
+      topicChips.textContent = "";
+
+      if (!topics.length) {
+        trendingStatus.textContent = "No trending topics found right now. Try refresh.";
+        return;
+      }
+
+      topics.forEach((topic) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "topic-chip";
+        chip.textContent = topic;
+        chip.addEventListener("click", () => useTrendingTopic(topic));
+        topicChips.append(chip);
+      });
+    }
+
+    async function fetchTrendingTopics() {
+      fetchTrendingBtn.disabled = true;
+      trendingStatus.textContent = "Fetching internet trends...";
+      topicChips.textContent = "";
+
+      const localToday = getLocalDateDaysAgo(0);
+      const localTodayLabel = `${localToday.year}-${localToday.month}-${localToday.day}`;
+      const dayOffsets = [0, 1, 2, 3, 4, 5, 6];
+      let chosenTopics = [];
+      let label = "";
+      let chosenOffset = null;
+
+      for (const offset of dayOffsets) {
+        const { year, month, day } = getLocalDateDaysAgo(offset);
+        const endpoint = `${WIKI_TRENDING_ENDPOINT}/${year}/${month}/${day}`;
+        try {
+          const response = await fetch(endpoint);
+          if (!response.ok) {
+            continue;
+          }
+
+          const data = await response.json();
+          const articles = data?.items?.[0]?.articles || [];
+          const deduped = new Set();
+
+          articles.forEach((article) => {
+            const rawTitle = article?.article || "";
+            if (!isValidTrendingTitle(rawTitle)) {
+              return;
+            }
+            deduped.add(formatTrendingTitle(rawTitle));
+          });
+
+          const topics = Array.from(deduped).slice(0, 10);
+          if (topics.length > 0) {
+            chosenTopics = topics;
+            label = `${year}-${month}-${day}`;
+            chosenOffset = offset;
+            break;
+          }
+        } catch (_) {
+          continue;
+        }
+      }
+
+      renderTrendingTopics(chosenTopics);
+      if (chosenTopics.length > 0) {
+        if (chosenOffset === 0) {
+          trendingStatus.textContent = `Trending on ${label} (local today). Click one to use it.`;
+        } else {
+          trendingStatus.textContent =
+            `Local today is ${localTodayLabel}. Latest available source date is ${label}. Click one to use it.`;
+        }
+      }
+      fetchTrendingBtn.disabled = false;
+    }
+
+    function resetUI() {
+      debateHistory = [];
+      opinionInput.value = "";
+      rebuttalInput.value = "";
+      debateThread.textContent = "";
+      debateArena.classList.remove("visible");
+      rebuttalWrap.hidden = true;
+      showStatus("");
+      resetJudgingState();
+      opinionInput.focus();
+    }
+
+    function renderDebateThread() {
+      debateThread.textContent = "";
+
+      debateHistory.forEach((turn, index) => {
+        const turnCard = document.createElement("article");
+        turnCard.className = `turn-card ${turn.role}`;
+
+        const turnHead = document.createElement("div");
+        turnHead.className = "turn-head";
+
+        const role = document.createElement("p");
+        role.className = "turn-role";
+        role.textContent = turn.role === "user" ? "You" : "The Counter Cannon";
+
+        const number = document.createElement("span");
+        number.className = "turn-number";
+        number.textContent = `Turn ${index + 1}`;
+
+        turnHead.append(role, number);
+
+        const text = document.createElement("p");
+        text.className = "turn-text";
+        text.textContent = turn.text;
+
+        turnCard.append(turnHead, text);
+        debateThread.append(turnCard);
+      });
+
+      if (debateHistory.length > 0) {
+        debateArena.classList.add("visible");
+      } else {
+        debateArena.classList.remove("visible");
+      }
+    }
+
+    function buildDebatePrompt() {
+      const transcript = debateHistory
+        .map((turn, index) => `${index + 1}. ${turn.role === "user" ? "User" : "Opponent"}: ${turn.text}`)
+        .join("\n");
+
+      return [
+        "You are 'The Counter Cannon', a witty and passionate debate opponent.",
+        "Always respond to the user's latest point with a counter-argument.",
+        "Keep it playful and sharp, but no harassment, slurs, or personal attacks.",
+        "Use natural Gen-Z style English: casual, punchy, modern phrasing.",
+        "Use light slang like 'low-key', 'wild', 'fr', 'no cap' only when it fits. Do not overdo it.",
+        "Sound confident and clever, not formal or academic.",
+        "Write 3-5 sentences as one paragraph. No bullet points.",
+        "Debate transcript:",
+        transcript,
+        "Now give only the opponent's next response."
+      ].join("\n");
+    }
+
+    async function getOpponentReply() {
+      const prompt = buildDebatePrompt();
+      let response;
+
+      try {
+        response = await fetch(OLLAMA_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: MODEL_NAME,
+            prompt,
+            stream: false,
+            options: {
+              temperature: 1.0,
+              top_p: 0.95
+            }
+          })
+        });
+      } catch (_) {
+        throw new Error("Cannot reach Ollama at http://127.0.0.1:11434. Start it with `ollama serve`.");
+      }
+
+      if (!response.ok) {
+        let apiMessage = "";
+        try {
+          const errorJson = await response.json();
+          apiMessage = errorJson?.error || errorJson?.message || "";
+        } catch (_) {
+          apiMessage = "";
+        }
+        throw new Error(toFriendlyApiError(response.status, apiMessage));
+      }
+
+      const data = await response.json();
+      const text = (data?.response || "").trim();
+
+      if (!text) {
+        throw new Error("No response text returned from Ollama.");
+      }
+
+      return text;
+    }
+
+    async function requestOpponentTurn() {
+      setLoadingState(true);
+      showStatus("Your opponent is crafting a comeback...");
+
+      try {
+        const opponentReply = await getOpponentReply();
+        debateHistory.push({ role: "opponent", text: opponentReply });
+        judgeLatestRound();
+        renderDebateThread();
+        rebuttalWrap.hidden = false;
+        showStatus("Your turn. Hit back with a rebuttal, or click End Debate.");
+      } catch (error) {
+        showStatus(error.message || "Something went wrong while debating.", true);
+      } finally {
+        setLoadingState(false);
+      }
+    }
+
+    debateBtn.addEventListener("click", async () => {
+      const opinion = opinionInput.value.trim();
+
+      if (!opinion) {
+        showStatus("Enter an opinion first so your opponent has something to challenge.", true);
+        return;
+      }
+
+      resetJudgingState();
+      debateHistory = [{ role: "user", text: opinion }];
+      rebuttalInput.value = "";
+      rebuttalWrap.hidden = true;
+      renderDebateThread();
+      await requestOpponentTurn();
+    });
+
+    rebuttalBtn.addEventListener("click", async () => {
+      if (debateHistory.length === 0) {
+        showStatus("Start the debate first with your opinion.", true);
+        return;
+      }
+
+      const rebuttal = rebuttalInput.value.trim();
+      if (!rebuttal) {
+        showStatus("Type your rebuttal before sending.", true);
+        return;
+      }
+
+      const userTurnCount = debateHistory.filter((turn) => turn.role === "user").length;
+      if (userTurnCount >= MAX_USER_TURNS) {
+        showStatus("Debate limit reached. Click End Debate for winner/loser, or Try Another to reset.", true);
+        return;
+      }
+
+      verdictCard.hidden = true;
+      debateHistory.push({ role: "user", text: rebuttal });
+      rebuttalInput.value = "";
+      renderDebateThread();
+      await requestOpponentTurn();
+    });
+
+    rebuttalInput.addEventListener("keydown", (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        rebuttalBtn.click();
+      }
+    });
+
+    endDebateBtn.addEventListener("click", declareWinner);
+
+    fetchTrendingBtn.addEventListener("click", fetchTrendingTopics);
+
+    resetBtn.addEventListener("click", resetUI);
+
+    updateScoreboardUI();
+    fetchTrendingTopics();
+  </script>
+</body>
+</html>
